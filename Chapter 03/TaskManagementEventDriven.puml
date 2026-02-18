@@ -1,0 +1,41 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+component "Task Management" as boundedContext {
+
+
+}
+interface "Task Management" as interfaceBc
+
+component "User Management" as userManagement
+interface "User Management" as interfaceUserManagement
+
+component "Document Management" as documentManagement
+interface "Document Management" as interfaceDocumentManagement
+
+
+
+queue "Event bus" as eventBus
+
+
+component "Client" as client
+
+interfaceBc -- boundedContext
+interfaceDocumentManagement -- documentManagement
+interfaceUserManagement -- userManagement
+
+boundedContext ..> eventBus : \l**Produce**:\nTask created,\nTask changed,\nTask deleted
+
+boundedContext <.. eventBus : \l\n**Consume**:\nTask created,\nTask changed,\nTask deleted
+
+client --> interfaceBc
+client --> interfaceDocumentManagement
+client --> interfaceUserManagement
+
+boundedContext <.. eventBus : \l\n**Consume**:\nUser created,\nUser changed,\nUser deleted
+
+userManagement ..> eventBus :\l\n**Produce**:\nUser created,\nUser changed,\nUser deleted
+documentManagement ..> eventBus :\l\n**Produce**:\nDocument created,\nDocument changed,\nDocument deleted
+
+boundedContext <.. eventBus : \l\n**Consume**:\nDocument changed,\nDocument deleted
+@enduml

@@ -1,0 +1,67 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+skinparam linetype ortho
+
+skinparam nodesep 5
+skinparam ranksep 1
+
+skinparam rectangle {
+    backgroundcolor white
+    fontsize 14
+}
+
+skinparam component {
+    backgroundcolor white
+    fontsize 14
+}
+
+skinparam arrow {
+    fontsize 14
+}
+
+skinparam queue {
+    fontsize 14
+}
+
+
+component "Task Management" as boundedContextA {
+    rectangle "Produce, find events"
+}
+component "Team Performance" as boundedContextB {
+    rectangle "Consume events" as performanceEvents
+}
+component "Project Controlling" as boundedContextC {
+    rectangle "Consume events" as controllingEvents
+}
+
+
+queue "Event Source" as eventSource {
+      rectangle "Topic:Task 1" as objectState1 {
+        rectangle "Task created" as event1
+        rectangle "Task assigned" as event2
+        rectangle "Task in progress" as event3
+        rectangle "Task done" as event4
+
+      }
+
+      rectangle "Topic: Task 2" as objectState2 {
+              rectangle "Task created" as event5
+              rectangle "Task assigned" as event6
+              rectangle "Task declined" as event7
+
+
+      }
+}
+
+boundedContextA -down-> eventSource
+boundedContextB -up-> eventSource
+boundedContextC -left-> eventSource
+
+'layout
+boundedContextC -up[hidden]-> boundedContextB
+
+
+
+
+@enduml

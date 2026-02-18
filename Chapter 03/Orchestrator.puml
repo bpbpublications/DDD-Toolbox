@@ -1,0 +1,29 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+    skinparam component {
+        backgroundcolor<<Orchestrator>> #cdcdcd
+        stereotypefontsize 8
+    }
+    component "Client" as client
+    component "AppShell" as appShell {
+         component "Orchestrator" <<Orchestrator>> as orchestrator
+         component "BC A - Micro UI" as microUiA
+         component "BC B - Micro-UI" as microUiB
+    }
+
+    component "Bounded Context A" as bcA
+    component "Bounded Context B" as bcB
+
+    client --> appShell
+
+    microUiA --> orchestrator
+    microUiB --> orchestrator
+
+    orchestrator --> bcA
+    orchestrator --> bcB
+
+
+
+
+@enduml

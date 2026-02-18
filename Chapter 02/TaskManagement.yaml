@@ -1,0 +1,847 @@
+openapi: 3.1.0
+info:
+  title: Task Management
+  description: |
+    Task Management API for managing tasks, assignees, and requestors.
+    Users can create, update, and manage tasks with different statuses.
+    Tasks can be assigned to users and contain metadata like due dates and descriptions.
+  contact:
+    email: admin@task-management.org
+    name: Task Management Team
+    url: https://api.task-management.org
+  version: 1.0.0
+  x-api-id: a7f3c8d1-2e4b-4c7a-9f8e-1d3b5c7e9f2a
+  x-audience: external-public
+servers:
+  - url: 'https://apis.task-management.org/task-management/'
+security:
+  - openIdConnect:
+      - task:read
+      - task:write
+      - task:admin
+tags:
+  - name: Tasks
+    description: All endpoints to manage tasks
+  - name: Assignees
+    description: All endpoints to manage task assignees
+  - name: Requestors
+    description: All endpoints to manage task requestors
+paths:
+  /tasks:
+    get:
+      description: Retrieves a list of tasks with optional filtering
+      operationId: getTasks
+      tags:
+        - Tasks
+      security:
+        - openIdConnect:
+            - task:read
+      parameters:
+        - $ref: '#/components/parameters/VersionParameter'
+        - name: status
+          in: query
+          description: Filter tasks by status
+          required: false
+          schema:
+            $ref: '#/components/schemas/TaskStatus'
+        - name: assigneeId
+          in: query
+          description: Filter tasks by assignee ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: requestorId
+          in: query
+          description: Filter tasks by requestor ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Maximum number of tasks to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of tasks to skip for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          $ref: '#/components/responses/TaskListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+    post:
+      description: Creates a new task
+      operationId: createNewTask
+      tags:
+        - Tasks
+      security:
+        - openIdConnect:
+            - task:write
+      parameters:
+        - $ref: '#/components/parameters/VersionParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/TaskToBeCreatedRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/LinkToTaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+  /tasks/{taskId}:
+    get:
+      description: Retrieves a single task by its identifier
+      operationId: getTaskById
+      tags:
+        - Tasks
+      security:
+        - openIdConnect:
+            - task:read
+      parameters:
+        - $ref: '#/components/parameters/TaskIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/TaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+    put:
+      description: Updates a task with all possible fields
+      operationId: updateTaskById
+      tags:
+        - Tasks
+      security:
+        - openIdConnect:
+            - task:write
+      parameters:
+        - $ref: '#/components/parameters/TaskIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/TaskToBeUpdatedRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LinkToTaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+    delete:
+      description: Deletes a task
+      operationId: deleteTaskById
+      tags:
+        - Tasks
+      security:
+        - openIdConnect:
+            - task:admin
+      parameters:
+        - $ref: '#/components/parameters/TaskIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessfulOperationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+  /tasks/{taskId}/status:
+    put:
+      description: Updates the status of a task
+      operationId: updateTaskStatusById
+      tags:
+        - Tasks
+      security:
+        - openIdConnect:
+            - task:write
+      parameters:
+        - $ref: '#/components/parameters/TaskIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/TaskStatusUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LinkToTaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+  /tasks/{taskId}/assignee:
+    put:
+      description: Assigns or updates the assignee of a task
+      operationId: updateTaskAssigneeById
+      tags:
+        - Tasks
+        - Assignees
+      security:
+        - openIdConnect:
+            - task:write
+      parameters:
+        - $ref: '#/components/parameters/TaskIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/TaskAssigneeUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LinkToTaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+    delete:
+      description: Removes the assignee from a task
+      operationId: removeTaskAssigneeById
+      tags:
+        - Tasks
+        - Assignees
+      security:
+        - openIdConnect:
+            - task:write
+      parameters:
+        - $ref: '#/components/parameters/TaskIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessfulOperationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+  /assignees:
+    get:
+      description: Retrieves a list of all assignees
+      operationId: getAssignees
+      tags:
+        - Assignees
+      security:
+        - openIdConnect:
+            - task:read
+      parameters:
+        - $ref: '#/components/parameters/VersionParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/AssigneeListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+  /assignees/{assigneeId}:
+    get:
+      description: Retrieves a single assignee by their identifier
+      operationId: getAssigneeById
+      tags:
+        - Assignees
+      security:
+        - openIdConnect:
+            - task:read
+      parameters:
+        - $ref: '#/components/parameters/AssigneeIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/AssigneeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+  /requestors:
+    get:
+      description: Retrieves a list of all requestors
+      operationId: getRequestors
+      tags:
+        - Requestors
+      security:
+        - openIdConnect:
+            - task:read
+      parameters:
+        - $ref: '#/components/parameters/VersionParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/RequestorListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+  /requestors/{requestorId}:
+    get:
+      description: Retrieves a single requestor by their identifier
+      operationId: getRequestorById
+      tags:
+        - Requestors
+      security:
+        - openIdConnect:
+            - task:read
+      parameters:
+        - $ref: '#/components/parameters/RequestorIdentifierParameter'
+        - $ref: '#/components/parameters/VersionParameter'
+      responses:
+        '200':
+          $ref: '#/components/responses/RequestorResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/ServiceNotAvailableResponse'
+        default:
+          $ref: '#/components/responses/DefaultResponse'
+
+components:
+  parameters:
+    TaskIdentifierParameter:
+      name: taskId
+      description: Task identifier
+      required: true
+      in: path
+      schema:
+        type: string
+        format: uuid
+        examples:
+          - 7b2c8d4e-1f3a-4e7b-9c2d-5f8e1a3b7c9d
+
+    AssigneeIdentifierParameter:
+      name: assigneeId
+      description: Assignee identifier
+      required: true
+      in: path
+      schema:
+        type: string
+        format: uuid
+        examples:
+          - 3a1b9c5d-7e2f-4a8b-1c3d-9e5f7a1b3c5d
+
+    RequestorIdentifierParameter:
+      name: requestorId
+      description: Requestor identifier
+      required: true
+      in: path
+      schema:
+        type: string
+        format: uuid
+        examples:
+          - 8e4a2b6c-9d1f-3e7a-5b9c-2f6a8e4b6c8e
+
+    VersionParameter:
+      name: x-version
+      description: Version of the API specification used delivered in header
+      in: header
+      required: true
+      schema:
+        type: string
+        x-extensible-enum:
+          - 1.0.0
+        default: 1.0.0
+        examples:
+          - 1.0.0
+
+  responses:
+    BadRequestResponse:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    ForbiddenResponse:
+      description: Forbidden
+
+    LinkToTaskResponse:
+      description: Successful operation - Task created or updated
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Link"
+
+    NotFoundResponse:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    TaskResponse:
+      description: Delivers back the task resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskFull'
+
+    TaskListResponse:
+      description: List of tasks
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - tasks
+              - totalCount
+            properties:
+              tasks:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskShort'
+              totalCount:
+                type: integer
+                description: Total number of tasks matching the filter criteria
+              limit:
+                type: integer
+                description: Maximum number of tasks returned
+              offset:
+                type: integer
+                description: Number of tasks skipped
+
+    AssigneeResponse:
+      description: Delivers back the assignee resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Assignee'
+
+    AssigneeListResponse:
+      description: List of assignees
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - assignees
+            properties:
+              assignees:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assignee'
+
+    RequestorResponse:
+      description: Delivers back the requestor resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Requestor'
+
+    RequestorListResponse:
+      description: List of requestors
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - requestors
+            properties:
+              requestors:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Requestor'
+
+    ServiceNotAvailableResponse:
+      description: Service not available
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    DefaultResponse:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    SuccessfulOperationResponse:
+      description: Successful operation
+
+  requestBodies:
+    TaskToBeCreatedRequest:
+      description: Creates a new task
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskToBeCreated'
+
+    TaskToBeUpdatedRequest:
+      description: Updates an existing task
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskFull'
+
+    TaskStatusUpdateRequest:
+      description: Request to update task status
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+            properties:
+              status:
+                $ref: '#/components/schemas/TaskStatus'
+
+    TaskAssigneeUpdateRequest:
+      description: Request to update task assignee
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - assigneeId
+            properties:
+              assigneeId:
+                type: string
+                format: uuid
+                description: Identifier of the assignee
+
+  schemas:
+    Error:
+      description: An error object used for error responses
+      type: object
+      required:
+        - title
+        - status
+        - timestamp
+      properties:
+        title:
+          description: A short description of the problem using kebab-cases
+          type: string
+          minLength: 2
+          maxLength: 255
+          examples:
+            - task-not-found
+        detail:
+          description: |
+            A human-readable description of the problem which can be used by technicians to solve the problem.
+          type: string
+          examples:
+            - The requested task could not be found.
+        timestamp:
+          description: Point in time when the error occurred
+          type: string
+          format: date-time
+          examples:
+            - 2024-07-01T23:32:54T+01:00
+        traceparent:
+          description: Tracking ID of the API journey
+          type: string
+          pattern: ^[0-9]{2}-[0-9a-z]{16}-[0-9a-z]{8}-[0-9a-z]{1}[0-9a-z]{1}$
+          examples:
+            - 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01
+        severity:
+          description: Severity of the according error
+          type: string
+          enum:
+            - FATAL
+            - ERROR
+            - WARNING
+            - INFO
+          examples:
+            - ERROR
+
+    Link:
+      description: Link to an entity
+      type: object
+      required:
+        - type
+        - link
+      properties:
+        type:
+          description: Not fully qualified type name of the object
+          type: string
+          minLength: 2
+          maxLength: 155
+          examples:
+            - Task
+        link:
+          description: URL to the according entity
+          type: string
+          format: uri
+          examples:
+            - https://apis.task-management.org/task-management/tasks/7b2c8d4e-1f3a-4e7b-9c2d-5f8e1a3b7c9d
+
+    TaskStatus:
+      description: Status of a task
+      type: string
+      enum:
+        - New
+        - Assigned
+        - In Progress
+        - Rejected
+      examples:
+        - New
+        - Assigned
+
+    Assignee:
+      description: Person assigned to work on tasks
+      type: object
+      required:
+        - assigneeId
+        - givenName
+        - familyName
+        - email
+      properties:
+        assigneeId:
+          description: Identifier of the assignee
+          type: string
+          format: uuid
+          examples:
+            - 3a1b9c5d-7e2f-4a8b-1c3d-9e5f7a1b3c5d
+        givenName:
+          description: Given name of the assignee
+          type: string
+          minLength: 2
+          maxLength: 55
+          examples:
+            - Jane
+        familyName:
+          description: Family name of the assignee
+          type: string
+          minLength: 2
+          maxLength: 55
+          examples:
+            - Smith
+        email:
+          description: Email address of the assignee
+          type: string
+          format: email
+          examples:
+            - jane.smith@example.com
+        department:
+          description: Department of the assignee
+          type: string
+          minLength: 2
+          maxLength: 100
+          examples:
+            - Engineering
+            - Marketing
+
+    Requestor:
+      description: Person who creates and requests tasks
+      type: object
+      required:
+        - requestorId
+        - givenName
+        - familyName
+        - email
+      properties:
+        requestorId:
+          description: Identifier of the requestor
+          type: string
+          format: uuid
+          examples:
+            - 8e4a2b6c-9d1f-3e7a-5b9c-2f6a8e4b6c8e
+        givenName:
+          description: Given name of the requestor
+          type: string
+          minLength: 2
+          maxLength: 55
+          examples:
+            - John
+        familyName:
+          description: Family name of the requestor
+          type: string
+          minLength: 2
+          maxLength: 55
+          examples:
+            - Doe
+        email:
+          description: Email address of the requestor
+          type: string
+          format: email
+          examples:
+            - john.doe@example.com
+        department:
+          description: Department of the requestor
+          type: string
+          minLength: 2
+          maxLength: 100
+          examples:
+            - Product Management
+            - Sales
+
+    TaskToBeCreated:
+      description: A new task to be created
+      type: object
+      required:
+        - title
+        - requestorId
+        - dueDate
+      properties:
+        title:
+          description: Title of the task
+          type: string
+          minLength: 5
+          maxLength: 255
+          examples:
+            - Fix login authentication bug
+        description:
+          description: Detailed description of the task
+          type: string
+          minLength: 10
+          maxLength: 2048
+          examples:
+            - Users are unable to login with their credentials. The authentication service returns a 500 error.
+        requestorId:
+          description: Identifier of the person who requested the task
+          type: string
+          format: uuid
+          examples:
+            - 8e4a2b6c-9d1f-3e7a-5b9c-2f6a8e4b6c8e
+        assigneeId:
+          description: Identifier of the person assigned to the task
+          type: string
+          format: uuid
+          examples:
+            - 3a1b9c5d-7e2f-4a8b-1c3d-9e5f7a1b3c5d
+        dueDate:
+          description: Due date for the task completion
+          type: string
+          format: date-time
+          examples:
+            - 2024-12-31T23:59:59Z
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+
+    Task:
+      description: Task information
+      type: object
+      required:
+        - taskId
+        - title
+        - status
+        - requestor
+        - createdAt
+      properties:
+        taskId:
+          description: Identifier of the task
+          type: string
+          format: uuid
+          examples:
+            - 7b2c8d4e-1f3a-4e7b-9c2d-5f8e1a3b7c9d
+        title:
+          description: Title of the task
+          type: string
+          minLength: 5
+          maxLength: 255
+          examples:
+            - Fix login authentication bug
+        description:
+          description: Detailed description of the task
+          type: string
+          minLength: 10
+          maxLength: 2048
+          examples:
+            - Users are unable to login with their credentials. The authentication service returns a 500 error. This affects all users trying to access the platform.
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        assignee:
+          $ref: '#/components/schemas/Assignee'
+        requestor:
+          $ref: '#/components/schemas/Requestor'
+        dueDate:
+          description: Due date for the task completion
+          type: string
+          format: date-time
+          examples:
+            - 2025-12-31T23:59:59Z
+        createdAt:
+          description: Timestamp when the task was created
+          type: string
+          format: date-time
+          examples:
+            - 2025-07-01T10:30:00Z
+        updatedAt:
+          description: Timestamp when the task was last updated
+          type: string
+          format: date-time
+          examples:
+            - 2024-07-02T14:15:30Z
+
+
+  securitySchemes:
+    openIdConnect:
+      type: openIdConnect
+      description: Security scheme for task management
+      openIdConnectUrl: "https://idp.task-management.org/configuration"
+  

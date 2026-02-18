@@ -1,0 +1,100 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+@startuml CatalogManagementDomainModel
+
+!define ENTITY class
+!define VALUE_OBJECT class
+!define ENUM enum
+
+
+    ENTITY CatalogEntry {
+        - catalogEntryIdentifier : UUID
+        - bookId : UUID
+        - isbn13 : String
+        - title : String
+        - subtitle : String
+        - areEditors : Boolean
+        - coverImageWebP : Binary
+        - media : URL
+        - format : MediaFormat
+        - abstract: String
+    }
+
+    ENTITY AuthorShort {
+        - authorId : UUID
+        - givenName : String
+        - familyName : String
+    }
+
+    ENTITY AuthorFull {
+        - authorPortraitWebP : Binary
+        - authorBiography : String
+    }
+
+    ENTITY Publisher {
+        - name : String
+        - city : String
+    }
+
+    VALUE_OBJECT Tag {
+        - tag : String
+    }
+
+    VALUE_OBJECT Link {
+        - type : String
+        - link : URI
+    }
+
+    VALUE_OBJECT Error {
+        - title : String
+        - detail : String
+        - timestamp : DateTime
+        - traceparent : String
+        - severity : ErrorSeverity
+    }
+
+    ENUM MediaFormat {
+        EPUB
+        KINDLE
+        PDF
+        BBEB
+        MOBI
+    }
+
+    ENUM ErrorSeverity {
+        FATAL
+        ERROR
+        WARNING
+        INFO
+    }
+
+    package "Security"  as security {
+        ENUM Permission {
+            CATALOG_READ
+            CATALOG_WRITE
+            CATALOG_ADMIN
+        }
+    }
+
+    ' Layout
+    MediaFormat -down[hidden]-> security
+
+
+
+
+
+
+' Relationships with cardinalities
+CatalogEntry "1" *-- "1" Publisher : has >
+CatalogEntry "1" *-- "1..10" AuthorShort : writtenBy >
+CatalogEntry "1" *-- "0..25" Tag : taggedWith >
+CatalogEntry "1" --> "1" MediaFormat : uses >
+
+AuthorShort <|-- AuthorFull : extends
+
+Error "1" --> "1" ErrorSeverity : has >
+
+@enduml
+
+@enduml

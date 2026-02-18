@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+
+component "Bounded Context A" as boundedContextA
+component "Bounded Context B" as boundedContextB
+
+queue "Event Source" as eventSource {
+      rectangle "Object" as objectState {
+        rectangle "Object\ncreated" as event1
+        rectangle "Object\nchanged 1" as event2
+        rectangle "Object\nchanged 2" as event3
+        rectangle "Object\nclosed" as event4
+
+      }
+}
+
+boundedContextA -down-> eventSource : Produce events, find events
+boundedContextB -up-> eventSource : Consume events
+
+'Layout
+
+event1 -right[hidden]- event2
+event2 -down[hidden]- event3
+event3 -right[hidden]- event4
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+autonumber
+
+actor "Team member" as teamMemberA
+
+participant "Task Management\nUser Interface" as taskMmgtUi
+participant "App Shell\nOrchstrator" as orchestrator
+participant "Header" as headerUi
+participant "Task Management\nBounded Context" as taskMmgtBc
+
+
+orchestrator --> taskMmgtBc: Register to Webhook URL
+
+group "Task creation"
+    teamMemberA --> taskMmgtUi : Create task
+    taskMmgtUi --> orchestrator : Create task
+    orchestrator --> taskMmgtBc : Create task
+    taskMmgtBc --> taskMmgtBc : Create task
+    taskMmgtBc --> orchestrator : Task created
+    orchestrator --> headerUi : Update number of tasks
+    headerUi --> headerUi : Update number of tasks
+
+end group
+
+@enduml

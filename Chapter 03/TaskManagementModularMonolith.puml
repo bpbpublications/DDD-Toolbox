@@ -1,0 +1,42 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+skinparam linetype ortho
+skinparam arrow {
+    fontcolor grey
+}
+
+node "Deployment Application" as deployment {
+    component "Task Management" as taskManagement {
+        component "Task Management\nQuery" as taskManagementQuery
+        component "Task Management\nCommand" as taskManagementCommand
+    }
+
+    component "Document Management" as documentManagement
+    component "User Management" as userManagement
+}
+
+database "Application Database" as database {
+    rectangle "Schema\nTask Management Query" as dbTaskQuery
+    rectangle "Schema\nTask Management Command" as dbTaskCommand
+    rectangle "Schema\nDocument Management" as dbDocMmgt
+    rectangle "Schema\nUser Management" as dbUserMmgt
+}
+
+queue "Event Bus" as eventBus
+
+taskManagementQuery --> dbTaskQuery
+taskManagementCommand --> dbTaskCommand
+taskManagementCommand -up-> eventBus : Produce CUD Task
+taskManagementCommand -up-> eventBus : Consume CUD User
+taskManagementCommand -up-> eventBus : Consume UD Document
+taskManagementQuery -up-> eventBus : Consume CUD Task
+
+documentManagement --> dbDocMmgt
+documentManagement --> eventBus : Produce UD Document
+
+userManagement --> dbUserMmgt
+userManagement --> eventBus : Produce CUD User
+
+
+@enduml

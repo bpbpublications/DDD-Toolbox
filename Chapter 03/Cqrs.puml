@@ -1,0 +1,41 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+
+component "Bounded Context Service" as boundedContext {
+
+    component "API" as api
+
+    component "Command service" as commandService {
+        component "Command\nBusiness Logic" as commandBl
+        database "Command database" as commandDb
+    }
+
+    component "Query service" as queryService {
+            component "Query\nBusiness Logic" as queryBl {
+            }
+            database "Query database" as querydDb
+        }
+}
+
+
+
+queue "Event bus" as eventBus
+interface "Bounded Context" as interfaceBc
+
+component "Client" as client
+
+interfaceBc -- api
+api --> commandBl : CUD
+api --> queryBl : R
+
+commandBl -right-> commandDb
+commandBl ..> eventBus : Produce event
+
+queryBl -right-> querydDb
+queryBl ..> eventBus : Consume event
+
+client --> interfaceBc
+
+
+@enduml

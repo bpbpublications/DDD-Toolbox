@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+node "Deployment" as deployment {
+    component "Bounded Context 1"
+    component "Bounded Context 2"
+}
+
+database "Application Database" as database {
+    rectangle "Schema\nBOUNDED CONTEXT 1" as dbBc1 {
+    }
+    rectangle "Schema\nBOUNDED CONTEXT 2" as dbBc2
+}
+
+queue "Event Bus" as eventBus
+
+deployment -down-> database
+deployment -up-> eventBus
+
+@enduml

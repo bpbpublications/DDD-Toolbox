@@ -1,0 +1,24 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor "Team member" as teamMemberA
+
+participant "Task Management\nUser Interface" as taskMmgtUi
+participant "App Shell\nChoreographer" as appShell
+participant "Header" as headerUi
+participant "Task Management\nBounded Context" as taskMmgtBc
+
+appShell --> taskMmgtBc : Register to Webhook URL
+
+group "Task Creation"
+    teamMemberA --> taskMmgtUi: Create task
+    taskMmgtUi --> taskMmgtBc: Create task
+    taskMmgtBc --> taskMmgtBc: Create task
+    taskMmgtBc --> appShell : Produce event \n"Task created"
+    headerUi --> appShell : Consume event \n"Task created"
+    headerUi --> headerUi : Update number\nof open tasks
+end group
+
+@enduml

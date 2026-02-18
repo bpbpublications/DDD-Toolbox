@@ -1,0 +1,40 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+
+component "Task Management" as boundedContext {
+
+    component "Task Management API" as api
+
+    component "Task Command Service" as commandService {
+        component "Task Creation/Changing" as commandBl
+        database "Task Writing" as commandDb
+    }
+
+    component "Task Query service" as queryService {
+            component "Task Lookup" as queryBl {
+            }
+            database "Task Query" as querydDb
+        }
+}
+
+
+
+queue "Event bus" as eventBus
+interface "Task Management" as interfaceBc
+
+component "Client" as client
+
+interfaceBc -- api
+api --> commandBl : CUD
+api --> queryBl : R
+
+commandBl -right-> commandDb
+commandBl ..> eventBus : \l**Produce**:\nTask created,\nTask changed,\nTask deleted
+
+queryBl -right-> querydDb
+queryBl ..> eventBus : \l\n**Consume**:\nTask created,\nTask changed,\nTask deleted
+
+client --> interfaceBc
+
+@enduml

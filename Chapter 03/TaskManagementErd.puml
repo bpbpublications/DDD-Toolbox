@@ -1,0 +1,33 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+skinparam component{
+    backgroundcolor<<Repository>> white
+    borderthickness<<Repository>> 2
+    fontstyle<<Repository>> bold
+    stereotypefontsize 14
+
+    backgroundcolor white
+
+}
+
+skinparam database {
+    backgroundcolor white
+}
+
+component "Task Management" as taskManagement {
+    component   "Task Management UI" <<User Interface>> as uiTaskManagement
+    component "Task Management BL" <<Domain Model>> as blTaskManagement
+    component "Task Management\nRepository" <<Repository>> as repTaskManagement
+    database "Task Management" as dbTaskManagement
+}
+
+component "Client" as client
+
+
+client --> uiTaskManagement
+uiTaskManagement --> blTaskManagement
+blTaskManagement --> repTaskManagement
+repTaskManagement --> dbTaskManagement
+
+@enduml

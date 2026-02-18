@@ -1,0 +1,93 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty members
+skinparam linetype ortho
+
+skinparam class {
+    backgroundcolor #FFFFFF
+    backgroundcolor<<Aggregate>> #FFFFFF
+    backgroundcolor<<Entity>> #FFFFFF
+    backgroundcolor<<Value Object>> #FFFFFF
+
+    bordercolor #888888
+    fontcolor grey
+    fontcolor<<Aggregate>> black
+    fontcolor<<Entity>> black
+    fontcolor<<Value Object>> black
+
+    attributefontcolor black
+    attributefontsize 14
+    attributefontcolor<<Aggregate>> black
+
+    stereotypefontcolor black
+    stereotypefontsize 14
+
+    fontsize 16
+
+
+}
+
+skinparam arrow {
+    color black
+    fontcolor grey
+    fontsize 10
+}
+
+class "Task"  as task <<(A,#FFFFFF) Aggregate>> {
+    * id: Uuid
+    * dueDate: Date
+    * createdOn: Date
+    description: Text
+    * title: string
+    assignee : LeanUser
+    * requester: LeanUser
+    * status: Status
+
+    * createNewTask(task: taskToBeCreated)
+    * getTaskById(id: Uuid)
+    * updateTask(task: taskToBeUpdated)
+    * updateDueDate(dueDate: Date)
+    * assignUser(assignee: LeanUser)
+    * setStatus(status: Status)
+    * getDescription()
+    * setDescription(text: String)
+}
+
+class "LeanUser" as leanUser <<(E,#FFFFFF) Entity>> {
+    * id: Uuid
+    * name: String
+    * surname: String
+
+    * getUsers(filter: String)
+    * getUserById(id: Uuid)
+}
+
+enum "Status" as status <<(N, #FFFFFF) Enumeration>> {
+    NEW
+    ASSIGNED
+    IN_PROGRESS
+    REJECTED
+    DONE
+}
+
+class "Text" as text <<Value Object>> {
+    *text: String
+    changedOn: Date
+    *hashValue: String
+}
+
+task o-- leanUser
+task *-- text
+task *-- status
+
+'layoust
+text *-[hidden]- status
+leanUser *-[hidden]- status
+
+@enduml
+
+@enduml
